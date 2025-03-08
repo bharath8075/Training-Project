@@ -10,10 +10,12 @@ public class CorsConfig {
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
+            private static final String localHost = "http://localhost:3000";
+            private static final String deployHost = "https://recipe-book-xi-tan.vercel.app";
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000") // Allow frontend
+                        .allowedOrigins(localHost, deployHost ) // Allow frontend
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allowed methods
                         .allowedHeaders("*") // Allow all headers
                         .allowCredentials(true); // Allow cookies/session-based authentication
