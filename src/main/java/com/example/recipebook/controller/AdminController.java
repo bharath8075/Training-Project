@@ -3,6 +3,9 @@ package com.example.recipebook.controller;
 import java.security.KeyStore.PasswordProtection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,8 +30,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.recipebook.dto.AdminDto;
 import com.example.recipebook.exception.RecipeNotFoundException;
 import com.example.recipebook.model.Recipe;
+import com.example.recipebook.model.Shop;
 import com.example.recipebook.model.User;
 import com.example.recipebook.repository.RecipeRepository;
+import com.example.recipebook.repository.ShopRepository;
 import com.example.recipebook.repository.UserRepository;
 import com.example.recipebook.service.AdminAuthService;
 @Controller
@@ -44,14 +50,14 @@ public class AdminController {
 
 	@Autowired
 	private RecipeRepository recipeRepo;
+	
+	@Autowired
+	private ShopRepository shopRepo;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-//  	@GetMapping("/login")
-//	public String showLoginPage() {
-//		return "Login";
-//	}
+
 	@GetMapping("/login")
 	public String showLoginPage(@RequestParam(value = "error", required = false) String error, Model model) {
 		if (error != null) {
@@ -191,4 +197,20 @@ public class AdminController {
 		return "redirect:/admin/recipebook/recipedetails/"+user.getId();
 	}
 
+//	ShopController code
+	@GetMapping("/add-Shop-Details")
+	public String showAddShop() {
+		return "AddShopDetails";
+	}
+	@PostMapping("/add-Shop-Details")
+	public String addShop(@ModelAttribute("shopDetails") Shop shop, BindingResult result, Model model) {
+	    if (result.hasErrors()) {
+	        model.addAttribute("loginError", "Please fill all fields correctly!");
+	        return "add-shop";
+	    }
+	    List<String> ingridients = shop.getIngridients();
+	    shop.setIngridients(ingridients);
+	    shopRepo.save(shop);
+	    return "redirect:/admin/recipebook/add-Shop-Details";  
+	}
 }
