@@ -1,12 +1,8 @@
 package com.example.recipebook.model;
 
+import javax.persistence.*;
 import java.util.List;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
 @Entity
 public class Shop {
@@ -17,28 +13,19 @@ public class Shop {
 	
 	private String shopName;
 	private String location;
-	
-	@ElementCollection
-	private List<String> ingridients;
 
-	public Shop(int id, String shopName, String location, List<String> ingridients) {
+	@OneToMany(mappedBy = "shop", cascade = CascadeType.ALL)
+	private List<Item> items;
+
+	Shop(){
 		super();
+	}
+
+	public Shop(int id, List<Item> items, String location, String shopName) {
 		this.id = id;
-		this.shopName = shopName;
+		this.items = items;
 		this.location = location;
-		this.ingridients = ingridients;
-	}
-	public Shop() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
+		this.shopName = shopName;
 	}
 
 	public String getShopName() {
@@ -49,6 +36,14 @@ public class Shop {
 		this.shopName = shopName;
 	}
 
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public String getLocation() {
 		return location;
 	}
@@ -57,12 +52,11 @@ public class Shop {
 		this.location = location;
 	}
 
-	public List<String> getIngridients() {
-		return ingridients;
+	public List<Item> getItems() {
+		return items;
 	}
 
-	public void setIngridients(List<String> ingridients) {
-		this.ingridients = ingridients;
+	public void setItems(List<Item> items) {
+		this.items = items;
 	}
-	
 }

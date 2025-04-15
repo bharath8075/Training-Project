@@ -24,7 +24,7 @@ import com.example.recipebook.model.User;
 import com.example.recipebook.repository.UserRepository;
 import com.example.recipebook.security.TokenGenerator;
 
-import jakarta.servlet.http.HttpServletRequest;
+//import jakarta.servlet.http.HttpServletRequest;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController

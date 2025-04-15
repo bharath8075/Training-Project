@@ -13,10 +13,15 @@ import com.example.recipebook.model.User;
 import com.example.recipebook.repository.UserRepository;
 import com.example.recipebook.service.CustomUserDetail;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+//import jakarta.servlet.FilterChain;
+//import jakarta.servlet.ServletException;
+//import jakarta.servlet.http.HttpServletRequest;
+//import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class ApiAuthenticationFilter extends OncePerRequestFilter {
@@ -25,7 +30,7 @@ public class ApiAuthenticationFilter extends OncePerRequestFilter {
 	private TokenGenerator tokenGenerator;
 
 	@Autowired
-	private UserRepository userRepo; 
+	private UserRepository userRepo;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -33,25 +38,25 @@ public class ApiAuthenticationFilter extends OncePerRequestFilter {
 		// TODO Auto-generated method stub
 		String authHeader = request.getHeader("Authorization");
 		String requestURI = request.getRequestURI();
-		
+
 		if(requestURI.startsWith("/admin/recipebook")) {
 			filterChain.doFilter(request, response);
 			return;
-			
+
 		}
-		
+
 		if(authHeader!=null && authHeader.startsWith("Bearer")) {
 			String token = authHeader.substring(7);
 			if(tokenGenerator.validateToken(token)) {
 				User user = userRepo.findByToken(token);
 				if(user!=null) {
-					
+
 					CustomUserDetail userDetails = new CustomUserDetail(user);
-					
+
 					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
 							userDetails, null, userDetails.getAuthorities());
 					SecurityContextHolder.getContext().setAuthentication(authentication);
-							
+
 				} else {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("User not found for the token");
@@ -62,13 +67,13 @@ public class ApiAuthenticationFilter extends OncePerRequestFilter {
                 response.getWriter().write("Invalid or expired token");
                 return;
             }
-		} else if (request.getRequestURI().startsWith("/recipebook/") 
-                && !request.getRequestURI().equals("/recipebook/register") 
+		} else if (request.getRequestURI().startsWith("/recipebook/")
+                && !request.getRequestURI().equals("/recipebook/register")
                 && !request.getRequestURI().equals("/recipebook/login")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Token required");
             return;
-		
+
 	}
 			filterChain.doFilter(request, response);
 	}

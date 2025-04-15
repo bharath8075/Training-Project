@@ -198,19 +198,5 @@ public class AdminController {
 	}
 
 //	ShopController code
-	@GetMapping("/add-Shop-Details")
-	public String showAddShop() {
-		return "AddShopDetails";
-	}
-	@PostMapping("/add-Shop-Details")
-	public String addShop(@ModelAttribute("shopDetails") Shop shop, BindingResult result, Model model) {
-	    if (result.hasErrors()) {
-	        model.addAttribute("loginError", "Please fill all fields correctly!");
-	        return "add-shop";
-	    }
-	    List<String> ingridients = shop.getIngridients();
-	    shop.setIngridients(ingridients);
-	    shopRepo.save(shop);
-	    return "redirect:/admin/recipebook/add-Shop-Details";  
-	}
+
 }

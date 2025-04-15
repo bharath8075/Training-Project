@@ -10,9 +10,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.example.recipebook.model.User;
 
 public class CustomUserDetail implements UserDetails{
-	
+
 	private User user;
-	
+
 	public CustomUserDetail(User user) {
 		this.user = user;
 	}
@@ -34,5 +34,25 @@ public class CustomUserDetail implements UserDetails{
 		// TODO Auto-generated method stub
 		return user.getEmail();
 	}
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
 
 }

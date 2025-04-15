@@ -47,23 +47,24 @@ public class SecurityConfiguration {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable());
 		http.cors();
-		http.authorizeHttpRequests(request ->
-		request.requestMatchers("/recipebook/register", "/recipebook/login").permitAll()
-		.requestMatchers("/admin/recipebook/login").permitAll()
-		.requestMatchers("/admin/recipebook/**").hasAuthority("ROLE_ADMIN")				
-				.anyRequest().authenticated());	
-
-		http.formLogin(form -> form
-				.loginPage("/admin/recipebook/login")
-				.defaultSuccessUrl("/admin/recipebook/dashboard", true)
-				.failureUrl("/admin/recipebook/login?error=true"))
-		.logout(form -> form
-				.invalidateHttpSession(true).clearAuthentication(true)
-				.logoutRequestMatcher(new AntPathRequestMatcher("/admin/recipebook/logout"))
-				.logoutSuccessUrl("/login").permitAll()
-				);
-		http.httpBasic().disable();
-		http.addFilterBefore(apiAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.authorizeHttpRequests().anyRequest().permitAll();
+//		http.authorizeHttpRequests(request ->
+//		request.requestMatchers("/recipebook/register", "/recipebook/login").permitAll()
+//		.requestMatchers("/admin/recipebook/login").permitAll()
+//		.requestMatchers("/admin/recipebook/**").hasAuthority("ROLE_ADMIN")
+//				.anyRequest().authenticated());
+//
+//		http.formLogin(form -> form
+//				.loginPage("/admin/recipebook/login")
+//				.defaultSuccessUrl("/admin/recipebook/dashboard", true)
+//				.failureUrl("/admin/recipebook/login?error=true"))
+//		.logout(form -> form
+//				.invalidateHttpSession(true).clearAuthentication(true)
+//				.logoutRequestMatcher(new AntPathRequestMatcher("/admin/recipebook/logout"))
+//				.logoutSuccessUrl("/login").permitAll()
+//				);
+//		http.httpBasic().disable();
+//		http.addFilterBefore(apiAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 	

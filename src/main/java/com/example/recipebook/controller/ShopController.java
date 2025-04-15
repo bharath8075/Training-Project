@@ -5,16 +5,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.example.recipebook.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.recipebook.dto.ShopResponseDto;
 import com.example.recipebook.model.Recipe;
@@ -38,6 +37,25 @@ public class ShopController {
 	@Autowired
 	private UserRepository userRepo;
 
+	@Autowired
+	private CartService cartService;
+
+	@GetMapping("/add-Shop-Details")
+	public List<Shop> showAddShop() {
+		List<Shop> allShops = shopRepo.findAll();
+		return allShops;
+	}
+
+	@PostMapping("/add-Shop-Details")
+	public String addShop(@ModelAttribute("shopDetails") Shop shop, BindingResult result, Model model) {
+		if (result.hasErrors()) {
+			model.addAttribute("loginError", "Please fill all fields correctly!");
+			return "AddShopDetails";
+		}
+		shopRepo.save(shop);
+		return "redirect:/admin/recipebook/add-Shop-Details";
+	}
+
 	@GetMapping("/shop/{id}")
 	public ResponseEntity<Object> showShops(@PathVariable long id, @RequestHeader("Authorization") String authHeader) {
 		String token = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
@@ -47,36 +65,58 @@ public class ShopController {
 		}
 
 		Optional<Recipe> recipeOptional = recipeRepo.findById(id);
-		if (!recipeOptional.isPresent()) {
+		if (recipeOptional.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Recipe not found!!"));
 		}
 
 		Recipe recipe = recipeOptional.get();
-		List<String> recipeIngridients = Arrays.asList(recipe.getIngridients().split(","));
+		String[] recipeIngridients = recipe.getIngridients().split(",");
 
 		List<Shop> allShops = shopRepo.findAll();
 		List<ShopResponseDto> shopResList = new ArrayList<>();
 		for (Shop shop : allShops) {
 
-			List<String> matchingIng = new ArrayList<>();
-			List<String> shopIng = new ArrayList<>();
+//			List<String> matchingIng = new ArrayList<>();
+//			List<String> shopIng = new ArrayList<>();
 
-			for (String ing : shop.getIngridients()) {
-				shopIng.add(ing.trim());
-			}
 
-			for (String ing : recipeIngridients) {
-				if (shopIng.contains(ing.trim())) {
-					matchingIng.add(ing.trim());
-				}
-			}
-			if (!matchingIng.isEmpty()) {
+//			for (String ing : shop.getIngridients()) {
+//				shopIng.add(ing.trim());
+//			}
+//
+//			for (String ing : recipeIngridients) {
+//				if (shopIng.contains(ing.trim())) {
+//					matchingIng.add(ing.trim());
+//				}
+//			}
+
+			List<String> shopItemNames = shop.getItems().stream()
+					.map(item -> item.getName().trim())
+					.collect(Collectors.toList());
+			List<String> matchingIngredients = Arrays.stream(recipeIngridients)
+					.map(String::trim)
+					.filter(shopItemNames::contains)
+					.collect(Collectors.toList());
+
+			if (!matchingIngredients.isEmpty()) {
 				ShopResponseDto shopResponseDto = new ShopResponseDto(shop.getShopName(), shop.getLocation(),
-						matchingIng);
+						matchingIngredients);
 				shopResList.add(shopResponseDto);
 			}
 		}
 
 		return ResponseEntity.ok(shopResList);
+	}
+
+	@PostMapping("/add-shop")
+	public ResponseEntity<?> addToCart(@RequestHeader("Authorization") String authHeader, @RequestParam Long itemId){
+		String token = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
+		User user = userRepo.findByToken(token);
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid user token"));
+		}
+		System.out.println(itemId);
+		cartService.addToCart(token, itemId);
+		return ResponseEntity.ok(Map.of("message", "Item added to cart"));
 	}
 }
