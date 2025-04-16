@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.example.recipebook.model.CartItem;
 import com.example.recipebook.service.CartService;
+import com.example.recipebook.service.ViewCartDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -109,13 +111,22 @@ public class ShopController {
 	}
 
 	@PostMapping("/add-shop")
-	public ResponseEntity<?> addToCart(@RequestHeader("Authorization") String authHeader, @RequestParam Long itemId){
+	public ResponseEntity<?> addToCart(@RequestHeader("Authorization") String authHeader, @RequestParam Long itemId, @RequestParam int quantity){
 		String token = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
 		User user = userRepo.findByToken(token);
 		if (user == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid user token"));
 		}
-		String result = cartService.addToCart(token, itemId);
+		String result = cartService.addToCart(token, itemId, quantity);
 		return ResponseEntity.ok(Map.of("message", result));
+	}
+
+	@GetMapping("/view-cart")
+	public ResponseEntity<?> viewCart(@RequestHeader("Authorization") String authHeader){
+		String token = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
+		User user = userRepo.findByToken(token);
+		List<ViewCartDto> cartItems = cartService.viewCart(user);
+
+		return ResponseEntity.ok(cartItems);
 	}
 }

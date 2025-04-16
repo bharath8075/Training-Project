@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CartService {
@@ -28,7 +29,7 @@ public class CartService {
     @Autowired
     private ItemRepository itemRepo;
 
-    public String addToCart(String token, Long itemId){
+    public String addToCart(String token, Long itemId, int quantity){
         User user = userRepo.findByToken(token);
         if (user == null) throw new RuntimeException("Invalid User");
 
@@ -52,8 +53,20 @@ public class CartService {
         CartItem cartItem = new CartItem();
         cartItem.setCart(cart);
         cartItem.setItem(item);
+        cartItem.setQuantity(quantity);
 
         cartItemRepo.save(cartItem);
         return "Item successfully added!!";
+    }
+
+    public List<ViewCartDto> viewCart(User user) {
+        Cart cart = cartRepo.findByUser(user);
+        List<CartItem> cartItems = cartItemRepo.findByCart(cart);
+
+        return cartItems.stream()
+                .map(ci -> new ViewCartDto(
+                        ci.getItem().getName(),
+                        ci.getQuantity()
+                )).collect(Collectors.toList());
     }
 }
