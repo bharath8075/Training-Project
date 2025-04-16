@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.example.recipebook.model.CartItem;
+import com.example.recipebook.dto.UpdateCartDto;
 import com.example.recipebook.service.CartService;
-import com.example.recipebook.service.ViewCartDto;
+import com.example.recipebook.dto.ViewCartDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -128,5 +128,26 @@ public class ShopController {
 		List<ViewCartDto> cartItems = cartService.viewCart(user);
 
 		return ResponseEntity.ok(cartItems);
+	}
+
+	@PutMapping("/cart/update-quantity")
+	public ResponseEntity<?> updateQuantity(@RequestHeader("Authorization") String authHeader,@RequestBody UpdateCartDto dto){
+		String token = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
+		User user = userRepo.findByToken(token);
+		if(user == null){
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User doesn't exist");
+		}
+		String result = cartService.updateQuantity(user, dto);
+		return  ResponseEntity.ok(result);
+	}
+
+	@DeleteMapping("/cart/remove-item/{itemId}")
+	public ResponseEntity<?> removeItem(@RequestHeader("Authorization") String authHeader, @PathVariable Long itemId){
+		String token = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
+		User user = userRepo.findByToken(token);
+
+		String result = cartService.removeItem(user,itemId);
+
+		return ResponseEntity.ok(result);
 	}
 }

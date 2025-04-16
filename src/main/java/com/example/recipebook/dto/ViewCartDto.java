@@ -1,4 +1,4 @@
-package com.example.recipebook.service;
+package com.example.recipebook.dto;
 
 public class ViewCartDto {
 

@@ -1,5 +1,7 @@
 package com.example.recipebook.service;
 
+import com.example.recipebook.dto.UpdateCartDto;
+import com.example.recipebook.dto.ViewCartDto;
 import com.example.recipebook.model.Cart;
 import com.example.recipebook.model.CartItem;
 import com.example.recipebook.model.Item;
@@ -68,5 +70,32 @@ public class CartService {
                         ci.getItem().getName(),
                         ci.getQuantity()
                 )).collect(Collectors.toList());
+    }
+
+    public String updateQuantity(User user, UpdateCartDto dto) {
+        Cart cart = cartRepo.findByUser(user);
+        if(cart == null){
+            throw new RuntimeException("Cart Empty");
+        }
+
+        CartItem cartItem = cartItemRepo.findByCartAndItemId(cart, dto.getItemId());
+        if(cartItem == null){
+            throw new RuntimeException("Item not found");
+        }
+
+        cartItem.setQuantity(dto.getQuantity());
+        cartItemRepo.save(cartItem);
+        return "Updated Successfully";
+    }
+
+    public String removeItem(User user, Long itemId) {
+
+        Cart cart = cartRepo.findByUser(user);
+        if(cart == null) throw new RuntimeException("Cart Empty");
+
+        CartItem cartItem = cartItemRepo.findByCartAndItemId(cart, itemId);
+        cartItemRepo.delete(cartItem);
+
+        return "item delted!!";
     }
 }
