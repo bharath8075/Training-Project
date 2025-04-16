@@ -115,8 +115,7 @@ public class ShopController {
 		if (user == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid user token"));
 		}
-		System.out.println(itemId);
-		cartService.addToCart(token, itemId);
-		return ResponseEntity.ok(Map.of("message", "Item added to cart"));
+		String result = cartService.addToCart(token, itemId);
+		return ResponseEntity.ok(Map.of("message", result));
 	}
 }

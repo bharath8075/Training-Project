@@ -11,6 +11,8 @@ import com.example.recipebook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CartService {
 
@@ -26,7 +28,7 @@ public class CartService {
     @Autowired
     private ItemRepository itemRepo;
 
-    public void addToCart(String token, Long itemId){
+    public String addToCart(String token, Long itemId){
         User user = userRepo.findByToken(token);
         if (user == null) throw new RuntimeException("Invalid User");
 
@@ -39,10 +41,19 @@ public class CartService {
             cart.setUser(user);
             cart = cartRepo.save(cart);
         }
+
+        List<CartItem> cartItems = cartItemRepo.findByCart(cart);
+        for (CartItem cartItem : cartItems){
+            if(cartItem.getItem().getId().equals(itemId)){
+                return "Item already exists!!";
+            }
+        }
+
         CartItem cartItem = new CartItem();
         cartItem.setCart(cart);
         cartItem.setItem(item);
 
         cartItemRepo.save(cartItem);
+        return "Item successfully added!!";
     }
 }
